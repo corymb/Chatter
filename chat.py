@@ -2,9 +2,13 @@ import rethinkdb as r
 from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
 
-from conf import UPDATE_INTERVAL
+from conf import (
+    HOST,
+    PORT,
+    UPDATE_INTERVAL
+)
 
-c = r.connect(host='localhost', port=28015)
+c = r.connect(host=HOST, port=PORT)
 
 def get_all_chat():
     rows = r.db('chat').table('log').run(c)
