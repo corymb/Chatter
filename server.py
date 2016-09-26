@@ -18,7 +18,7 @@ def get_template(messages):
 
 
 def format_message(row):
-    return '<p>%s %s: %s</p>' % (
+    return '<p>%s <b>%s</b>: %s</p>' % (
         row.get('time').strftime('%H:%M:%S'),
         row.get('user'),
         row.get('message')
