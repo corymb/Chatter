@@ -1,5 +1,6 @@
 import rethinkdb as r
 from twisted.internet.defer import succeed
+from twisted.web.static import File
 from klein import run, route
 
 from conf import (
@@ -8,6 +9,12 @@ from conf import (
 )
 
 c = r.connect(host=HOST, port=PORT)
+
+
+def get_template(messages):
+    with open('chat.html') as html:
+        data = html.read().replace('\n', '').strip()
+    return data % messages
 
 
 def format_message(row):
@@ -19,7 +26,7 @@ def format_message(row):
 
 
 def get_all_messages():
-    messages = r.db('chat').table('log').order_by(index=r.desc('time')).run(c)
+    messages = r.db('chat').table('log').order_by(index=r.asc('time')).run(c)
     return [format_message(m) for m in messages]
 
 
@@ -27,6 +34,12 @@ def send_message(user, message):
     return r.db('chat').table('log').insert(
         [{'user': user, 'message': message, 'time': r.now()}]
     ).run(c)
+
+
+# Routes:
+@route('/static/', branch=True)
+def static(request):
+    return File("./static")
 
 
 @route('/', methods=['POST'])
@@ -42,6 +55,6 @@ def get_post_data(request):
 
 @route('/')
 def chat(request):
-    return '\n'.join(get_all_messages())
+    return get_template('\n'.join(get_all_messages()))
 
 run("localhost", 8000)
